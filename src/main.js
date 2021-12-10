@@ -1,8 +1,9 @@
-import Vue from 'vue'
+import { createApp } from 'vue'
 import App from './App.vue'
+import { inspect } from "@xstate/inspect";
+inspect({
+  iframe: () => document.querySelector('iframe[data-xstate]'),
+  url: 'https://statecharts.io/inspect'
+});
 
-Vue.config.productionTip = false
-
-new Vue({
-  render: h => h(App),
-}).$mount('#app')
+createApp(App).mount('#app')
