@@ -1,17 +1,17 @@
 <template>
   <div id="app">
-    <OnOffCounter></OnOffCounter>
+    <traffic-light></traffic-light>
     <hr />
   </div>
 </template>
 
 <script>
-import OnOffCounter from "@/components/OnOffCounter";
+import TrafficLight from "@/components/TrafficLight";
 
 export default {
   name: "App",
   components: {
-    OnOffCounter,
+    TrafficLight,
   },
 };
 </script>

@@ -3,14 +3,10 @@
     <h1>On-Off Switch</h1>
     <!-- On envoie un évenement au statechart-->
     <button @click="send('TOGGLE')">Interrupteur</button>
-    <!-- L'image dépend de l'état du statechart-->
-    <img  alt="Light Bulb"
-      :src="state.matches('inactive') ? 
-        'light_bulb.gif' : 
-        'light_bulb_glow.gif'"
-    />
-     <code>
-      Allumée 
+    <!-- L'image  est calculée par le composant en fonction de l'état -->
+    <img alt="Light Bulb 💡" :src="imageSource" />
+    <code>
+      Allumée
       <!-- On accède aux variables internes du statechart-->
       <strong>{{ state.context.count }}</strong> fois
     </code>
@@ -44,10 +40,14 @@ export default {
     const { state, send } = useMachine(toggleMachine, { devTools: true });
     return { state, send };
   },
+  computed: {
+    imageSource() {
+      return this.state.matches('inactive') ? 'light_bulb.gif' : 'light_bulb_glow.gif';
+    },
+  },
 };
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 h3 {
   margin: 40px 0 0;

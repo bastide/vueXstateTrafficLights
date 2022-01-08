@@ -1,90 +1,79 @@
 <template>
   <div id="trafficLights">
-    <h1>French Traffic Lights</h1>
-    <img  alt="Traffic Light" :src="
-      state.matches('red') ? 
-        'traffic-red.gif' : 
-      state.matches('green') ? 
-        'traffic-green.gif' : 
-      state.matches('yellow') ? 
-          'traffic-yellow.gif' :
-      'traffic-off.gif'
-    " />
-    <hr>
-    <button @click="send('TURN_ON')">Turn On</button>
-    <button @click="send('TURN_OFF')">Turn Off</button>
-    <button @click="send('START_REPAIR')">Start Repair</button>
-    <button @click="send('END_REPAIR')">End Repair</button>
+    <h1>French Traffic Lights 🚦</h1>
+    <img alt="Traffic Light" :src="imageSource" />
+    <hr />
+    <button @click="send('TURNON')"  :disabled="!state.matches('off')">Turn On</button>
+    <button @click="send('TURNOFF')" :disabled="state.matches('off')">Turn Off</button>
+    <button @click="send('RESET')"   :disabled="!state.matches('normalOperation')">Reset</button>
+    <button @click="send('GO')"      :disabled="!state.matches('blinking')">Go</button>
+  </div>
 </template>
 
 <script>
-import { createMachine, assign } from 'xstate';
-import { useMachine } from '@xstate/vue';
+import { createMachine } from "xstate";
+import { useMachine } from "@xstate/vue";
 
 const normalSubstates = {
-  initial: 'orange',
+  initial: "orange",
   states: {
     orange: {
       after: {
-        3000: { target: 'red' },
+        3000: { target: "red" },
       },
     },
     red: {
       after: {
-        3000: { target: 'green' },
+        3000: { target: "green" },
       },
     },
     green: {
       after: {
-        3000: { target: 'orange' },
+        3000: { target: "orange" },
       },
     },
   },
 };
 
-const repairingSubstates = {
-  initial: 'orange',
+const blinkingSubstates = {
+  initial: "orange",
   states: {
     orange: {
       after: {
-        1000: { target: 'off' },
+        1000: { target: "off" },
       },
     },
     off: {
       after: {
-        1000: { target: 'orange' },
+        1000: { target: "orange" },
       },
     },
-  },
-  // String delays configured here
-  delays: {
-    BLINK_DELAY: 500, // static value
-  },
+  }
 };
 
 const lightMachine = createMachine({
-  id: 'french_traffic_lights',
-  initial: 'off',
+  id: "french_traffic_lights",
+  initial: "off",
   context: {
     retries: 0,
   },
   states: {
     off: {
       on: {
-        TURN_ON: 'repairing',
+        TURNON: "blinking",
       },
     },
-    repairing: {
+    blinking: {
       on: {
-        FINISH_REPAIR: 'normalOperation',
-        TURN_OFF: 'off',
+        GO: "normalOperation",
+        TURNOFF: "off",
       },
-      ...repairingSubstates,
+      ...blinkingSubstates,
     },
     normalOperation: {
       on: {
-        START_REPAIR: 'repairing',
-        TURN_OFF: 'off',
+        RESET: "blinking",
+        TURNOFF: "off",
       },
       ...normalSubstates,
     },
@@ -92,10 +81,22 @@ const lightMachine = createMachine({
 });
 
 export default {
-  name: 'TrafficLight',
+  name: "TrafficLight",
   setup() {
     const { state, send } = useMachine(lightMachine, { devTools: true });
     return { state, send };
+  },
+  computed: {
+    imageSource() {
+      const stateMatches = this.state.matches;
+      if ([ "blinking.orange", "normalOperation.orange" ].some(stateMatches))
+        return "traffic-orange.png";
+      if (stateMatches("normalOperation.green"))
+        return "traffic-green.png";
+      if (stateMatches("normalOperation.red"))
+        return "traffic-red.png";
+      return "traffic-off.png";
+    },
   },
 };
 </script>
